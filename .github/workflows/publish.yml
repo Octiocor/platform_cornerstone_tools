@@ -32,7 +32,7 @@ jobs:
 
       - name: Bump version
         run: |
-          npm version patch -m "Bump version to %s [skip ci]"
+          npm version patch -m "Publish %s [skip ci]"
           git push
           git push --tags
 
