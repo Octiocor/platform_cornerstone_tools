@@ -1,6 +1,6 @@
 {
-  "name": "cornerstone-tools",
-  "version": "0.0.0-semantically-released",
+  "name": "@octiocor/cornerstone-tools",
+  "version": "1.0.0",
   "description": "Medical imaging tools for the Cornerstone library",
   "main": "./dist/cornerstoneTools.js",
   "keywords": [
@@ -9,12 +9,12 @@
     "imaging",
     "cornerstone"
   ],
-  "author": "https://github.com/cornerstonejs/cornerstoneTools#contributors",
-  "homepage": "https://github.com/cornerstonejs/cornerstoneTools",
+  "author": "https://github.com/Octiocor/platform_cornerstone_tools#contributors",
+  "homepage": "https://github.com/Octiocor/platform_cornerstone_tools",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cornerstonejs/cornerstoneTools.git"
+    "url": "https://github.com/Octiocor/platform_cornerstone_tools.git"
   },
   "engines": {
     "node": ">=8.16.0"

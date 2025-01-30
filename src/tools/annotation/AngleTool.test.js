@@ -149,7 +149,7 @@ describe('AngleTool.js', () => {
       };
 
       instantiatedTool.updateCachedStats(image, element, data);
-      expect(data.rAngle).toBe(76.76);
+      expect(data.rAngle).toBe(283.24);
       expect(data.invalidated).toBe(false);
     });
   });

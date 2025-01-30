@@ -61,12 +61,12 @@ export default class AngleTool extends BaseAnnotationTool {
   }
 
   createNewMeasurement(eventData) {
-    // Create the measurement data for this tool with the end handle activated
-    return {
+    const measurementData = {
       visible: true,
       active: true,
       color: undefined,
       invalidated: true,
+      clockwise: true,
       handles: {
         start: {
           x: eventData.currentPoints.image.x,
@@ -96,6 +96,7 @@ export default class AngleTool extends BaseAnnotationTool {
         },
       },
     };
+    return measurementData;
   }
 
   pointNearTool(element, data, coords) {
@@ -134,6 +135,22 @@ export default class AngleTool extends BaseAnnotationTool {
 
     angle *= 180 / Math.PI;
 
+    // Calculate cross product to determine rotation direction
+    const crossProduct = sideA.x * sideB.y - sideA.y * sideB.x;
+
+    // Only set clockwise if it's undefined
+    if (data.clockwise === undefined) {
+      data.clockwise = crossProduct > 0;
+    }
+
+    // Calculate final angle based on clockwise property and cross product
+    const shouldBeReflexAngle = data.clockwise
+      ? crossProduct > 0
+      : crossProduct < 0;
+    if (shouldBeReflexAngle) {
+      angle = 360 - angle;
+    }
+
     data.rAngle = roundToDecimal(angle, 2);
     data.invalidated = false;
   }
@@ -147,7 +164,6 @@ export default class AngleTool extends BaseAnnotationTool {
       hideHandlesIfMoving,
       renderDashed,
     } = this.configuration;
-    // If we have no toolData for this element, return immediately as there is nothing to do
     const toolData = getToolState(evt.currentTarget, this.name);
     const lineDash = getModule('globalConfiguration').configuration.lineDash;
 
@@ -155,7 +171,6 @@ export default class AngleTool extends BaseAnnotationTool {
       return;
     }
 
-    // We have tool data for this element - iterate over each one and draw it
     const context = getNewContext(eventData.canvasContext.canvas);
     const { image, element } = eventData;
     const { rowPixelSpacing, colPixelSpacing } = getPixelSpacing(image);
@@ -172,24 +187,14 @@ export default class AngleTool extends BaseAnnotationTool {
       draw(context, context => {
         setShadow(context, this.configuration);
 
-        // Differentiate the color of activation tool
         const color = toolColors.getColorIfActive(data);
-
-        const handleStartCanvas = external.cornerstone.pixelToCanvas(
-          eventData.element,
-          data.handles.start
-        );
-        const handleMiddleCanvas = external.cornerstone.pixelToCanvas(
-          eventData.element,
-          data.handles.middle
-        );
-
         const lineOptions = { color };
 
         if (renderDashed) {
           lineOptions.lineDash = lineDash;
         }
 
+        // Draw the angle lines
         drawJoinedLines(
           context,
           eventData.element,
@@ -197,6 +202,61 @@ export default class AngleTool extends BaseAnnotationTool {
           [data.handles.middle, data.handles.end],
           lineOptions
         );
+
+        // Draw the angle arc
+        const handleMiddleCanvas = external.cornerstone.pixelToCanvas(
+          eventData.element,
+          data.handles.middle
+        );
+        const handleStartCanvas = external.cornerstone.pixelToCanvas(
+          eventData.element,
+          data.handles.start
+        );
+        const handleEndCanvas = external.cornerstone.pixelToCanvas(
+          eventData.element,
+          data.handles.end
+        );
+
+        // Calculate vectors
+        const startVector = {
+          x: handleStartCanvas.x - handleMiddleCanvas.x,
+          y: handleStartCanvas.y - handleMiddleCanvas.y,
+        };
+        const endVector = {
+          x: handleEndCanvas.x - handleMiddleCanvas.x,
+          y: handleEndCanvas.y - handleMiddleCanvas.y,
+        };
+
+        // Calculate cross product to determine actual angle direction
+        const crossProduct =
+          startVector.x * endVector.y - startVector.y * endVector.x;
+
+        // Only set clockwise on initial render if it's undefined
+        if (data.clockwise === undefined) {
+          if (data.rAngle > 180) {
+            data.clockwise = crossProduct < 0;
+          } else {
+            data.clockwise = crossProduct > 0;
+          }
+        }
+
+        // Calculate start angle and angle range
+        const startAngle = Math.atan2(startVector.y, startVector.x);
+        const endAngle = Math.atan2(endVector.y, endVector.x);
+
+        // Draw arc
+        const arcRadius = 20;
+        context.beginPath();
+        context.arc(
+          handleMiddleCanvas.x,
+          handleMiddleCanvas.y,
+          arcRadius,
+          startAngle,
+          endAngle,
+          !data.clockwise
+        );
+        context.strokeStyle = color;
+        context.stroke();
 
         // Draw the handles
         const handleOptions = {
@@ -358,6 +418,33 @@ export default class AngleTool extends BaseAnnotationTool {
         );
       }
     );
+  }
+
+  doubleClickCallback(evt) {
+    const element = evt.detail.element;
+    const coords = evt.detail.currentPoints.canvas;
+    const toolState = getToolState(element, this.name);
+
+    if (!toolState) {
+      return false;
+    }
+
+    // Check if we clicked near any of our tools
+    for (let i = 0; i < toolState.data.length; i++) {
+      const data = toolState.data[i];
+      if (this.pointNearTool(element, data, coords)) {
+        data.clockwise = !data.clockwise;
+        data.invalidated = true; // Allow recalculation with new clockwise value
+        external.cornerstone.updateImage(element);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  touchPressCallback(evt) {
+    return this.doubleClickCallback(evt);
   }
 }
 
