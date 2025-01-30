@@ -1,4 +1,4 @@
-name: Publish to NPM
+name: Publish to GitHub Packages
 
 on:
   push:
@@ -17,7 +17,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@octiocor'
 
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
@@ -36,7 +37,7 @@ jobs:
           git push
           git push --tags
 
-      - name: Publish to NPM
-        run: npm publish --access private
+      - name: Publish to GitHub Packages
+        run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

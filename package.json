@@ -1,6 +1,6 @@
 {
   "name": "@octiocor/cornerstone-tools",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "Medical imaging tools for the Cornerstone library",
   "main": "./dist/cornerstoneTools.js",
   "keywords": [
@@ -133,5 +133,8 @@
     "not dead",
     "not IE < 11",
     "not op_mini all"
-  ]
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
 }
