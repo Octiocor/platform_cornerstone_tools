@@ -96,6 +96,7 @@ export default class AngleTool extends BaseAnnotationTool {
         },
       },
     };
+
     return measurementData;
   }
 
@@ -147,11 +148,21 @@ export default class AngleTool extends BaseAnnotationTool {
     const shouldBeReflexAngle = data.clockwise
       ? crossProduct > 0
       : crossProduct < 0;
+
     if (shouldBeReflexAngle) {
       angle = 360 - angle;
     }
 
     data.rAngle = roundToDecimal(angle, 2);
+
+    // Update description if it starts with [Octiocor-label]
+    if (data.description && data.description.startsWith('[Octiocor-label]')) {
+      data.description = data.description.replace(
+        /(\d+(\.\d+)?)\s*degrees/,
+        `${data.rAngle} degrees`
+      );
+    }
+
     data.invalidated = false;
   }
 
@@ -246,6 +257,7 @@ export default class AngleTool extends BaseAnnotationTool {
 
         // Draw arc
         const arcRadius = 20;
+
         context.beginPath();
         context.arc(
           handleMiddleCanvas.x,
@@ -432,10 +444,12 @@ export default class AngleTool extends BaseAnnotationTool {
     // Check if we clicked near any of our tools
     for (let i = 0; i < toolState.data.length; i++) {
       const data = toolState.data[i];
+
       if (this.pointNearTool(element, data, coords)) {
         data.clockwise = !data.clockwise;
         data.invalidated = true; // Allow recalculation with new clockwise value
         external.cornerstone.updateImage(element);
+
         return true;
       }
     }
