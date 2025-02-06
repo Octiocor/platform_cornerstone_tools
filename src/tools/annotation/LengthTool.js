@@ -137,7 +137,7 @@ export default class LengthTool extends BaseAnnotationTool {
 
     // Store the length inside the tool for outside access
     data.length = length;
-    
+
     // Update description if it starts with [Octiocor-label]
     if (data.description && data.description.startsWith('[Octiocor-label]')) {
       data.description = data.description.replace(
@@ -145,7 +145,6 @@ export default class LengthTool extends BaseAnnotationTool {
         `${data.length} mm`
       );
     }
-
     data.invalidated = false;
   }
 
