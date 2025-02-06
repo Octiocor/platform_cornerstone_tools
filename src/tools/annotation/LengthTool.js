@@ -18,6 +18,7 @@ import { getLogger } from '../../util/logger.js';
 import getPixelSpacing from '../../util/getPixelSpacing';
 import throttle from '../../util/throttle';
 import { getModule } from '../../store/index';
+import roundToDecimal from './../../util/roundToDecimal.js';
 
 const logger = getLogger('tools:annotation:LengthTool');
 
@@ -136,7 +137,7 @@ export default class LengthTool extends BaseAnnotationTool {
     const length = Math.sqrt(dx * dx + dy * dy);
 
     // Store the length inside the tool for outside access
-    data.length = length;
+    data.length = roundToDecimal(length, 2);
 
     // Update description if it starts with [Octiocor-label]
     if (data.description && data.description.startsWith('[Octiocor-label]')) {
