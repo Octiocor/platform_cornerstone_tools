@@ -14,7 +14,7 @@ const defaultConfiguration = {
   fillAlphaInactive: 0.0,
   outlineAlpha: 0.7,
   outlineAlphaInactive: 0.7,
-  outlineWidth: 2,
+  outlineWidth: 0,
   storeHistory: true,
   segmentsPerLabelmap: 65535, // Max is 65535 due to using 16-bit Unsigned ints.
   arrayType: UINT_16_ARRAY,

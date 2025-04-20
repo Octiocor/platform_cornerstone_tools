@@ -121,7 +121,7 @@ cornerstoneTools.init([
   {
     moduleName: 'segmentation',
     configuration: {
-      outlineWidth: 2,
+      outlineWidth: 0,
     },
   },
 ]);
